@@ -1,0 +1,30 @@
+Package: dpm.lpa
+Type: Package
+Title: Dirichlet Process Mixture Latent Profile Analysis
+Version: 0.1.0
+Author: Sam Paskewitz
+Maintainer: Sam Paskewitz <samuel.paskewitz@yale.edu>
+Description: Performs a type of Bayesian latent profile analysis (LPA) that 
+    automatically infers the number of latent profiles. In particular, it
+    implements variational Bayes estimation of the Dirichlet process mixture
+    model, hence the name DPM-LPA.
+Config/reticulate/autoconfigure:
+  list(
+    packages = list(
+      list(package = "numpy"),
+      list(package = "pandas"),
+      list(package = "scipy"),
+      list(package = "plotnine", pip = TRUE),
+      list(package = "vbayesfa", pip = TRUE)
+    )
+  )
+License: What license is it under?
+Depends: 
+    R (>= 2.10),
+    reticulate
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

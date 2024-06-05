@@ -1,0 +1,86 @@
+---
+title: "fitting_LPA_model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fitting_LPA_model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+load the dpm.lpa R package
+```{r setup}
+library(dpm.lpa)
+# To build: devtools::build_vignettes()
+```
+update relevant Python packages to the latest versions (this is optional and thus commented out)
+```{r}
+# update_python_packages()
+```
+### import and standardize data
+```{r}
+data(iris)#read.csv("data/LPA example data.csv", row.names = 1)
+x = data.frame(scale(iris[, c('Sepal.Width', 'Petal.Width')]))
+```
+### fit the DPM-LPA model
+```{r, warning=FALSE}
+fitted_lpa = fit_dpm_lpa(x = x,
+                         restarts = 10)
+```
+## look at model output
+
+### print summary of profile fit
+```{r print_summary, warning=FALSE}
+print_lpa_summary(fitted_lpa)
+```
+### plot residuals
+```{r residuals, warning=FALSE, fig.show='hide'}
+plot_lpa_residuals(fitted_lpa)$show()
+```
+
+### plot estimated profile means (mu)
+```{r profile_means, warning=FALSE}
+plot_profile_means(fitted_lpa)$show()
+```
+### plot estimated profile base rates (probabilities, pi)
+```{r profile_base_rates, warning=FALSE}
+# FIX THIS (START FROM 1 NOT WORKING; need to check that the Python code works properly, then upload that to PyPi, then update the downloaded version here)
+plot_profile_probs(fitted_lpa, start_profile_labels_from1 = FALSE)$show()
+```
+### analyze similarity between profiles
+```{r profile_similarity, warning=FALSE}
+profile_similarity(model = fitted_lpa)$plot$show()
+```
+## outcome analysis
+
+We now want to see if the latent profiles are related to some outcome variables.
+We first use the 'outcome_analysis_normal' function to run the analysis. This
+returns a list with various results. We save this list as 'result'. You can view the
+function's help file (using '?outcome_analysis_normal') for a description of
+each of the elements contained in the function's output. We are mainly interested
+in two outputs: the results of analysis using Bayes factors, and a plot of estimated
+profile outcome means.
+```{r run_outcome_analysis, warning=FALSE}
+result = outcome_analysis_normal(model = fitted_lpa,
+                                 #y = data.frame(matrix(rnorm(n = 2*150), nrow = 150, ncol = 2)))
+                                 y = data.frame(y1 = rnorm(n = 150), y2 = rnorm(n = 150)))
+                        #y = data.frame(scale(as.numeric(iris$Sepal.Length))))
+```
+### Bayes Factors
+```{r bayes_factors, warning=FALSE}
+result$bayes_factors
+```
+### Plot of profile outcome variable means (95% credible interval)
+```{r outcome_plot}
+result$plot$show()
+```
+
+```{r}
+hist(rnorm(100))
+```
+
