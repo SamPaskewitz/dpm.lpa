@@ -8,15 +8,12 @@ Analyze the relationship between dependent variables (y) - that are assumed to
 be normally distributed - and the profiles. This is done without changing the model's other variational parameters.
 }
 \usage{
-outcome_analysis_normal(model, y, x_new = NULL, y_new = NULL, index = NULL, profile_labels = NULL, start_profile_labels_from1 = FALSE, prior_alpha = 1, prior_beta = 1, prior_m = 0, prior_lambda = 1, figure_size = c("10", "12"), font_size = 11, facet_var = "variable", ncol = 4)
+outcome_analysis_normal(model, y, profile_labels = NULL, start_profile_labels_from1 = FALSE, prior_alpha = 1, prior_beta = 1, prior_m = 0, prior_lambda = 1, figure_size = c("10", "12"), font_size = 11, facet_var = "variable", ncol = 4)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{model}{The fitted LPA model.}
   \item{y}{Outcome data (data frame).}
-  \item{x_new}{New LPA model data from participants not used to fit the LPA model(data frame).}
-  \item{y_new}{New outcome data from participants not used to fit the LPA model (data frame).}
-  \item{index}{Optional individual participant/observation labels.}
   \item{profile_labels}{Optional labels for latent profiles.}
   \item{do_post_hoc}{Whether or not to do post-hoc analysis to group profile means into
         partitions. This can be computationally intensive if there are more
@@ -40,10 +37,6 @@ outcome_analysis_normal(model, y, x_new = NULL, y_new = NULL, index = NULL, prof
     hyperparameters or r^2. This does not seem to make much practical difference, but is an inconsistency that could be changed
     later.
 
-    Currently y_new and x_new are not used. In a previous version, they were used to compute r^2 values for observations/
-    participants that had not been used in fitting either the LPA model or the outcome variable relationship. This
-    provided a measure of out of sample generalization of outcome relationships. This should be added back into a future version.
-
     ** ADD DETAILS ABOUT THE BAYES FACTORS AND PARTIION-BASED POST-HOC ANALYSIS**}
 \value{
 %%  ~Describe the value returned
@@ -62,28 +55,6 @@ A list with the following data:
     \item{post_hpar}{Posterior hyperparameters of each outcome for each latent profile.}
 }
 \author{Sam Paskewitz}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (model, y, x_new = NULL, y_new = NULL, index = NULL,
-    profile_labels = NULL, start_profile_labels_from1 = FALSE,
-    prior_alpha = 1, prior_beta = 1, prior_m = 0, prior_lambda = 1,
-    figure_size = c("10", "12"), font_size = 11, facet_var = "variable",
-    ncol = 4)
-{
-    result = lpa$lpa_outcome_analysis$fit_y_normal(model, as.numeric(y),
-        x_new, y_new, index, profile_labels, start_profile_labels_from1,
-        prior_alpha, prior_beta, prior_m, prior_lambda, figure_size,
-        font_size, facet_var, ncol)
-    return(result)
-  }
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
 % \keyword{ ~kwd1 }

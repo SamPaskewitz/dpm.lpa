@@ -14,30 +14,29 @@ knitr::opts_chunk$set(
   fig.width = 5,
   fig.height = 4)
 ```
-Load the dpm.lpa R package.
+## Introduction.
+This vignette illustrates Dirichlet Process Mixture Latent Profile Analysis (DPM-LPA). It uses a fake data set (lpa_example_data) that includes data from several cognitive tasks (nback_digit, nback_picture, stroop, trail_making, wcst) and school grades in different subjects (math, reading, gym). The goal of the analysis is to form latent profiles based on the cognitive tasks then see whether these profiles are related to school grades.
+
+## Set up.
+
+### Load the dpm.lpa R package.
 ```{r setup}
 library(dpm.lpa)
 # To build: devtools::build_vignettes()
 ```
-Update relevant Python packages to the latest versions (this is optional and thus commented out).
+### Update relevant Python packages to the latest versions (this is optional and thus commented out).
 ```{r update_python_packages}
 #update_python_packages()
 ```
-### load data
+### Load data.
 ```{r import_data}
 data(lpa_example_data)
-```
-
-### standardize data
-While not strictly necessary, the code is designed to deal with standardized (i.e. z-scored data).
-```{r standardize_data}
-x = as.data.frame(scale(lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit', 'nback_picture')]))
 ```
 
 ### fit the DPM-LPA model
 This function fits the DPM-LPA model to your data.
 ```{r fit_model}
-fitted_lpa = fit_dpm_lpa(x = x)
+fitted_lpa = fit_dpm_lpa(x = lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit', 'nback_picture')])
 ```
 ## assess model assumptions
 
@@ -53,7 +52,6 @@ Standard LPA assumes that the observed variables (x) are independent conditioned
 ```{r}
 lpa_residual_correlations(fitted_lpa)
 ```
-
 ## fit the model again with revised data
 
 ### revise the data set
@@ -127,23 +125,18 @@ in two outputs: the results of analysis using Bayes factors, and a plot of estim
 profile outcome means.
 ```{r run_outcome_analysis}
 result = outcome_analysis_normal(model = fitted_lpa_v2,
-                                 y = as.data.frame(scale(lpa_example_data[, c('math', 'reading', 'gym')])))
+                                 y = lpa_example_data[, c('math', 'reading', 'gym'))
 ```
 ### Bayes Factors
 This table reports the results of Bayesian analysis of variance (* INSERT REF *).
 The first column ("bf10") reports the Bayes factor, which is the ratio of evidence for H1 (the latent profiles have different means) divided by the evidence for H0 (the latent profiles have the same mean).
 The second column ("log10_bf10") reports the base-10 logarithm of the Bayes factor, which can be easier to interpret.
-The third column ("conclusion") reports the conclusion of the Bayes factor, which is that the profile means differ, are equal, or the evidence is not decisive. This is based on the conventional criterion of log10(BF) > 0.5 being decisive ** INSERT REF **.
+The third column ("conclusion") reports the conclusion of the Bayes factor, which is that the profile means differ, are equal, or the evidence is not decisive. This is based on the conventional criterion of log10(BF) > 0.5 being decisive.
 Finally, the fourth column ("post_hoc_result") reports the result of post-hoc analysis, which partitions the latent profiles into groups that have the same mean as each other. See the function documentation for further details.
 
 In this example, the Bayes factors indicate that the profiles have different means for math and reading (with stronger evidence in the case of math), but have the same mean for gym (the null hypothesis is supported, something we can do in Bayesian analysis). Post-hoc tests indicate that all three profile have different means for math, but that profiles 1 and 2 have the same mean for reading (with profile 3 having a different mean).
-
-NOTE TO SELF: fix the display of post-hoc results.
 ```{r bayes_factors}
 result$bayes_factors
-```
-```{python}
-r.result['bayes_factors'].loc[0, 'post_hoc_result']
 ```
 
 ### Plot of profile outcome variable means (95% credible interval)
