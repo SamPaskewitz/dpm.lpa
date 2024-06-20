@@ -10,77 +10,141 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
-)
+  comment = "#>")
 ```
-load the dpm.lpa R package
+## Introduction.
+This vignette illustrates Dirichlet Process Mixture Latent Profile Analysis (DPM-LPA). It uses a fake data set (lpa_example_data) that includes data from several cognitive tasks (nback_digit, nback_picture, stroop, trail_making, wcst) and school grades in different subjects (math, reading, gym). The goal of the analysis is to form latent profiles based on the cognitive tasks then see whether these profiles are related to school grades.
+
+## Set up.
+
+### Load the dpm.lpa R package.
 ```{r setup}
 library(dpm.lpa)
 # To build: devtools::build_vignettes()
 ```
-update relevant Python packages to the latest versions (this is optional and thus commented out)
-```{r}
-# update_python_packages()
+### Update relevant Python packages to the latest versions (this is optional and thus commented out).
+```{r update_python_packages}
+#update_python_packages()
 ```
-### import and standardize data
-```{r}
-data(iris)#read.csv("data/LPA example data.csv", row.names = 1)
-x = data.frame(scale(iris[, c('Sepal.Width', 'Petal.Width')]))
+### Load data.
+```{r import_data}
+data(lpa_example_data)
 ```
+
 ### fit the DPM-LPA model
-```{r, warning=FALSE}
-fitted_lpa = fit_dpm_lpa(x = x,
-                         restarts = 10)
+This function fits the DPM-LPA model to your data.
+```{r fit_model}
+fitted_lpa = fit_dpm_lpa(x = lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit', 'nback_picture')])
 ```
-## look at model output
+## assess model assumptions
+
+### plot histograms of residuals (normality assumption)
+This is a simple diagnostic plot to assess the model's assumption that each variable is normally distributed within each profile, which is similar to the normality  assumption in ANOVA or linear regression. Histograms of residuals (observations - predicted values, shown as dark gray bars) are plotted alongside normal distributions with the same standard deviation (in blue). If the residuals of one variable are too far from being normally distributed, e.g. if they are highly skewed, then you should consider transforming that variable (much like in linear regression) and then re-doing the LPA model fit. We can see that the residuals for trail_making are very right-skewed,
+so we should try a log-transformation.
+```{r residuals}
+plot_lpa_residuals(fitted_lpa)
+```
+
+### look at residual correlation matrix (local independence assumption)
+Standard LPA assumes that the observed variables (x) are independent conditioned on latent profile. Thus, the residuals should be uncorrelated. This function plots the residual correlation matrix. The off-diagonal elements should be close to 0. However, we can see that the correlation between nback_digit and nback_picture is extremely high, suggesting that these variables are redundant. One of them should be dropped.
+```{r}
+lpa_residual_correlations(fitted_lpa)
+```
+## fit the model again with revised data
+
+### revise the data set
+We will log-transform trail_making to fix its skewed residuals, and drop nback_picture because its residuals are so highly correlated with those of nback_digit.
+```{r}
+x_v2 = lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit')] # drop nback_picture
+x_v2$trail_making = log(x_v2$trail_making) # log-transform trail_making
+x_v2 = as.data.frame(scale(x_v2)) # scale, i.e. z-score
+```
+
+### re-fit the model
+```{r fit_model_v2}
+fitted_lpa_v2 = fit_dpm_lpa(x = x_v2)
+```
+
+### check residual normality again
+All of the residuals look nice and normally distributed. It looks like the log-transformation of trail_making worked.
+```{r}
+plot_lpa_residuals(fitted_lpa_v2)
+```
+### check residual correlations again
+The residuals are nice and uncorrelated. It looks like the revised model (fitted_lpa_v2) is good to go.
+```{r}
+lpa_residual_correlations(fitted_lpa_v2)
+```
+
+## look at the fitted model
 
 ### print summary of profile fit
-```{r print_summary, warning=FALSE}
-print_lpa_summary(fitted_lpa)
+This function gives a basic summary of the fitted LPA model, including the number of observations (participants), the proportional reduction in entropy (a measure of how "certain" the model is in assigning participants to profiles), the number of profiles, the number of people in each profile, estimates of profile means (mu) etc.
+```{r print_summary}
+print_lpa_summary(fitted_lpa_v2)
 ```
-### plot residuals
-```{r residuals, warning=FALSE, fig.show='hide'}
-plot_lpa_residuals(fitted_lpa)$show()
-```
-
 ### plot estimated profile means (mu)
-```{r profile_means, warning=FALSE}
-plot_profile_means(fitted_lpa)$show()
+This plots the estimated means of each profile on each latent variable. By default,
+the plot is broken into facets (subplots) based on latent profile, with variable
+on the x-axis, and the posterior distribution expected values of each profile mean
+are plotted as bars. However other varieties of plot are available: see the function's
+documentation for details.
+```{r profile_means}
+plot_profile_means(fitted_lpa_v2)
 ```
 ### plot estimated profile base rates (probabilities, pi)
+This simply plots the estimated base rates (probabilities) of the latent profiles
+using bars.
 ```{r profile_base_rates, warning=FALSE}
-# FIX THIS (START FROM 1 NOT WORKING; need to check that the Python code works properly, then upload that to PyPi, then update the downloaded version here)
-plot_profile_probs(fitted_lpa, start_profile_labels_from1 = FALSE)$show()
+plot_profile_probs(fitted_lpa_v2)
 ```
-### analyze similarity between profiles
-```{r profile_similarity, warning=FALSE}
-profile_similarity(model = fitted_lpa)$plot$show()
+## extract estimated latent profiles
+
+### extract "hard" estimates of latent profiles
+This function extracts a data frame of "hard" estimates of each participant's latent profile, i.e. the most probable latent profile for each participant. This data can then be used for other analyses, exported (using write.csv for example) etc.
+```{r}
+profiles = extract_profiles(fitted_lpa_v2)
+head(profiles)
 ```
+
+### extract "soft" estimates of latent profiles
+By specifying 'profile_probs = TRUE', the function will instead extract a data frame of "soft" latent profiles estimates, i.e. the probability that each person is in each latent profile.
+```{r}
+soft_profiles = extract_profiles(fitted_lpa_v2, profile_probs = TRUE)
+head(soft_profiles)
+```
+
 ## outcome analysis
 
 We now want to see if the latent profiles are related to some outcome variables.
 We first use the 'outcome_analysis_normal' function to run the analysis. This
 returns a list with various results. We save this list as 'result'. You can view the
-function's help file (using '?outcome_analysis_normal') for a description of
+function's documentation (using '?outcome_analysis_normal') for a description of
 each of the elements contained in the function's output. We are mainly interested
 in two outputs: the results of analysis using Bayes factors, and a plot of estimated
 profile outcome means.
-```{r run_outcome_analysis, warning=FALSE}
-result = outcome_analysis_normal(model = fitted_lpa,
-                                 #y = data.frame(matrix(rnorm(n = 2*150), nrow = 150, ncol = 2)))
-                                 y = data.frame(y1 = rnorm(n = 150), y2 = rnorm(n = 150)))
-                        #y = data.frame(scale(as.numeric(iris$Sepal.Length))))
+```{r run_outcome_analysis}
+result = outcome_analysis_normal(model = fitted_lpa_v2,
+                                 y = lpa_example_data[, c('math', 'reading', 'gym')])
 ```
 ### Bayes Factors
-```{r bayes_factors, warning=FALSE}
+This table reports the results of Bayesian analysis of variance (* INSERT REF *).
+The first column ("bf10") reports the Bayes factor, which is the ratio of evidence for H1 (the latent profiles have different means) divided by the evidence for H0 (the latent profiles have the same mean).
+The second column ("log10_bf10") reports the base-10 logarithm of the Bayes factor, which can be easier to interpret.
+The third column ("conclusion") reports the conclusion of the Bayes factor, which is that the profile means differ, are equal, or the evidence is not decisive. This is based on the conventional criterion of log10(BF) > 0.5 being decisive.
+Finally, the fourth column ("post_hoc_result") reports the result of post-hoc analysis, which partitions the latent profiles into groups that have the same mean as each other. See the function documentation for further details.
+
+In this example, the Bayes factors indicate that the profiles have different means for math and reading (with stronger evidence in the case of math), but have the same mean for gym (the null hypothesis is supported, something we can do in Bayesian analysis). Post-hoc tests indicate that all three profile have different means for math, but that profiles 1 and 2 have the same mean for reading (with profile 3 having a different mean).
+```{r bayes_factors}
 result$bayes_factors
 ```
+
 ### Plot of profile outcome variable means (95% credible interval)
 ```{r outcome_plot}
 result$plot$show()
 ```
-
+### data frame of profile outcome means (same data that is plotted above)
+This is a data frame containing the same data that is plotted above. It gives the posterior mean (mu), variance (v), and the lower and upper bounds of the 95% credible interval (mu_minus, mu_plus) of each profile's mean for each outcome variable. This data frame can be exported if desired (using the write.csv function for example).
 ```{r}
-hist(rnorm(100))
+result$plot_df
 ```
-

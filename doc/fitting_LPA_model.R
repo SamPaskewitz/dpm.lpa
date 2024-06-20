@@ -1,52 +1,68 @@
 ## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
-)
+  comment = "#>")
 
 ## ----setup--------------------------------------------------------------------
 library(dpm.lpa)
 # To build: devtools::build_vignettes()
 
-## -----------------------------------------------------------------------------
-# update_python_packages()
+## ----update_python_packages---------------------------------------------------
+#update_python_packages()
+
+## ----import_data--------------------------------------------------------------
+data(lpa_example_data)
+
+## ----fit_model----------------------------------------------------------------
+fitted_lpa = fit_dpm_lpa(x = lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit', 'nback_picture')])
+
+## ----residuals----------------------------------------------------------------
+plot_lpa_residuals(fitted_lpa)
 
 ## -----------------------------------------------------------------------------
-data(iris)#read.csv("data/LPA example data.csv", row.names = 1)
-x = data.frame(scale(iris[, c('Sepal.Width', 'Petal.Width')]))
+lpa_residual_correlations(fitted_lpa)
 
-## ----warning=FALSE------------------------------------------------------------
-fitted_lpa = fit_dpm_lpa(x = x,
-                         restarts = 10)
+## -----------------------------------------------------------------------------
+x_v2 = lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit')] # drop nback_picture
+x_v2$trail_making = log(x_v2$trail_making) # log-transform trail_making
+x_v2 = as.data.frame(scale(x_v2)) # scale, i.e. z-score
 
-## ----print_summary, warning=FALSE---------------------------------------------
-print_lpa_summary(fitted_lpa)
+## ----fit_model_v2-------------------------------------------------------------
+fitted_lpa_v2 = fit_dpm_lpa(x = x_v2)
 
-## ----residuals, warning=FALSE, fig.show='hide'--------------------------------
-plot_lpa_residuals(fitted_lpa)$show()
+## -----------------------------------------------------------------------------
+plot_lpa_residuals(fitted_lpa_v2)
 
-## ----profile_means, warning=FALSE---------------------------------------------
-plot_profile_means(fitted_lpa)$show()
+## -----------------------------------------------------------------------------
+lpa_residual_correlations(fitted_lpa_v2)
+
+## ----print_summary------------------------------------------------------------
+print_lpa_summary(fitted_lpa_v2)
+
+## ----profile_means------------------------------------------------------------
+plot_profile_means(fitted_lpa_v2)
 
 ## ----profile_base_rates, warning=FALSE----------------------------------------
-# FIX THIS (START FROM 1 NOT WORKING; need to check that the Python code works properly, then upload that to PyPi, then update the downloaded version here)
-plot_profile_probs(fitted_lpa, start_profile_labels_from1 = FALSE)$show()
+plot_profile_probs(fitted_lpa_v2)
 
-## ----profile_similarity, warning=FALSE----------------------------------------
-profile_similarity(model = fitted_lpa)$plot$show()
+## -----------------------------------------------------------------------------
+profiles = extract_profiles(fitted_lpa_v2)
+head(profiles)
 
-## ----run_outcome_analysis, warning=FALSE--------------------------------------
-result = outcome_analysis_normal(model = fitted_lpa,
-                                 #y = data.frame(matrix(rnorm(n = 2*150), nrow = 150, ncol = 2)))
-                                 y = data.frame(y1 = rnorm(n = 150), y2 = rnorm(n = 150)))
-                        #y = data.frame(scale(as.numeric(iris$Sepal.Length))))
+## -----------------------------------------------------------------------------
+soft_profiles = extract_profiles(fitted_lpa_v2, profile_probs = TRUE)
+head(soft_profiles)
 
-## ----bayes_factors, warning=FALSE---------------------------------------------
+## ----run_outcome_analysis-----------------------------------------------------
+result = outcome_analysis_normal(model = fitted_lpa_v2,
+                                 y = lpa_example_data[, c('math', 'reading', 'gym')])
+
+## ----bayes_factors------------------------------------------------------------
 result$bayes_factors
 
 ## ----outcome_plot-------------------------------------------------------------
 result$plot$show()
 
 ## -----------------------------------------------------------------------------
-hist(rnorm(100))
+result$plot_df
 

@@ -32,7 +32,7 @@ plot_profile_probs = function(model,
                               figure_size = c(4, 3),
                               font_size = 11,
                               start_profile_labels_from1 = TRUE){
-  return(model$plot_profile_probs(figure_size, font_size, start_profile_labels_from1))
+  return(model$plot_profile_probs(figure_size, font_size, start_profile_labels_from1)$show())
 }
 
 plot_profile_means = function(model,
@@ -43,7 +43,7 @@ plot_profile_means = function(model,
                               ncol = 4,
                               fancy_labels = TRUE,
                               start_profile_labels_from1 = TRUE){
-  return(model$plot_profile_means(figure_size, font_size, kind, facet_var, ncol, fancy_labels, start_profile_labels_from1))
+  return(model$plot_profile_means(figure_size, font_size, kind, facet_var, ncol, fancy_labels, start_profile_labels_from1)$show())
 }
 
 plot_lpa_residuals = function(model,
@@ -51,7 +51,7 @@ plot_lpa_residuals = function(model,
                               font_size = 11,
                               ncol = 4,
                               bins = 20){
-  return(model$plot_residuals(figure_size, font_size, ncol, bins))
+  return(model$plot_residuals(figure_size, font_size, ncol, bins)$show())
 }
 
 lpa_residual_correlations = function(model,

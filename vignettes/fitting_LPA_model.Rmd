@@ -1,18 +1,17 @@
 ---
-title: "fitting_LPA_model"
+title: "Dirichlet Process Mixture Latent Profile Analysis"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{fitting_LPA_model}
+  %\VignetteIndexEntry{Dirichlet Process Mixture Latent Profile Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
+# devtools::install(dependencies = TRUE, build_vignettes = TRUE)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.width = 5,
-  fig.height = 4)
+  comment = "#>")
 ```
 ## Introduction.
 This vignette illustrates Dirichlet Process Mixture Latent Profile Analysis (DPM-LPA). It uses a fake data set (lpa_example_data) that includes data from several cognitive tasks (nback_digit, nback_picture, stroop, trail_making, wcst) and school grades in different subjects (math, reading, gym). The goal of the analysis is to form latent profiles based on the cognitive tasks then see whether these profiles are related to school grades.
@@ -22,7 +21,6 @@ This vignette illustrates Dirichlet Process Mixture Latent Profile Analysis (DPM
 ### Load the dpm.lpa R package.
 ```{r setup}
 library(dpm.lpa)
-# To build: devtools::build_vignettes()
 ```
 ### Update relevant Python packages to the latest versions (this is optional and thus commented out).
 ```{r update_python_packages}
@@ -35,7 +33,7 @@ data(lpa_example_data)
 
 ### fit the DPM-LPA model
 This function fits the DPM-LPA model to your data.
-```{r fit_model}
+```{r fit_model, cache = TRUE}
 fitted_lpa = fit_dpm_lpa(x = lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit', 'nback_picture')])
 ```
 ## assess model assumptions
@@ -63,7 +61,7 @@ x_v2 = as.data.frame(scale(x_v2)) # scale, i.e. z-score
 ```
 
 ### re-fit the model
-```{r fit_model_v2}
+```{r fit_model_v2, cache = TRUE}
 fitted_lpa_v2 = fit_dpm_lpa(x = x_v2)
 ```
 
@@ -97,7 +95,7 @@ plot_profile_means(fitted_lpa_v2)
 ### plot estimated profile base rates (probabilities, pi)
 This simply plots the estimated base rates (probabilities) of the latent profiles
 using bars.
-```{r profile_base_rates, warning=FALSE}
+```{r profile_base_rates}
 plot_profile_probs(fitted_lpa_v2)
 ```
 ## extract estimated latent profiles
@@ -106,12 +104,14 @@ plot_profile_probs(fitted_lpa_v2)
 This function extracts a data frame of "hard" estimates of each participant's latent profile, i.e. the most probable latent profile for each participant. This data can then be used for other analyses, exported (using write.csv for example) etc.
 ```{r}
 profiles = extract_profiles(fitted_lpa_v2)
+head(profiles)
 ```
 
 ### extract "soft" estimates of latent profiles
 By specifying 'profile_probs = TRUE', the function will instead extract a data frame of "soft" latent profiles estimates, i.e. the probability that each person is in each latent profile.
 ```{r}
 soft_profiles = extract_profiles(fitted_lpa_v2, profile_probs = TRUE)
+head(soft_profiles)
 ```
 
 ## outcome analysis
@@ -125,7 +125,7 @@ in two outputs: the results of analysis using Bayes factors, and a plot of estim
 profile outcome means.
 ```{r run_outcome_analysis}
 result = outcome_analysis_normal(model = fitted_lpa_v2,
-                                 y = lpa_example_data[, c('math', 'reading', 'gym'))
+                                 y = lpa_example_data[, c('math', 'reading', 'gym')])
 ```
 ### Bayes Factors
 This table reports the results of Bayesian analysis of variance (* INSERT REF *).
@@ -141,10 +141,15 @@ result$bayes_factors
 
 ### Plot of profile outcome variable means (95% credible interval)
 ```{r outcome_plot}
-result$plot
+result$plot$show()
 ```
 ### data frame of profile outcome means (same data that is plotted above)
 This is a data frame containing the same data that is plotted above. It gives the posterior mean (mu), variance (v), and the lower and upper bounds of the 95% credible interval (mu_minus, mu_plus) of each profile's mean for each outcome variable. This data frame can be exported if desired (using the write.csv function for example).
 ```{r}
 result$plot_df
 ```
+```{r}
+library(ggplot2)
+ggplot(aes(x = math, y = reading), data = lpa_example_data) + geom_point()
+```
+
