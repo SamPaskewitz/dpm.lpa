@@ -53,16 +53,3 @@ head(profiles)
 soft_profiles = extract_profiles(fitted_lpa_v2, profile_probs = TRUE)
 head(soft_profiles)
 
-## ----run_outcome_analysis-----------------------------------------------------
-result = outcome_analysis_normal(model = fitted_lpa_v2,
-                                 y = lpa_example_data[, c('math', 'reading', 'gym')])
-
-## ----bayes_factors------------------------------------------------------------
-result$bayes_factors
-
-## ----outcome_plot-------------------------------------------------------------
-result$plot$show()
-
-## -----------------------------------------------------------------------------
-result$plot_df
-
