@@ -6,13 +6,12 @@
 Extract participants' inferred latent profiles into a data frame. This can then be combined with another data frame or saved (e.g. as a .csv file) for later analysis.
 }
 \usage{
-extract_profiles(model, start_profile_labels_from1 = TRUE, profile_probs = FALSE, include_x = FALSE)
+extract_profiles(model, start_profile_labels_from1 = TRUE, profile_probs = FALSE)
 }
 \arguments{
   \item{model}{DPM-LPA model object.}
   \item{start_profile_labels_from1}{Whether to label latent profiles starting from 0 (Python style) or from 1 (R/Matlab/ordinary counting style). This only affects output labeling, not any calculations.}
   \item{profile_probs}{If TRUE, then return the estimated probability of the participant being in each profile ("soft" assignment). If FALSE, then return the index of each participant's most probable profile ("hard" assignment).}
-  \item{include_x}{If TRUE, then append the original observed data (x) to the profile estimates.}
 }
 \value{A data frame.}
 \author{Samuel Paskewitz}

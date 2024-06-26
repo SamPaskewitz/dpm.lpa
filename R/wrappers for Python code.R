@@ -22,36 +22,37 @@ fit_dpm_lpa = function(x,
 }
 
 profile_similarity = function(model,
-                              figure_size = c(4, 3),
                               font_size = 11,
                               start_profile_labels_from1 = TRUE){
-  return(model$profile_similarity(figure_size, font_size, start_profile_labels_from1))
+  # call the Python function to do the analysis
+  result = model$profile_similarity(NULL, font_size, start_profile_labels_from1)
+  result$most_similar_pair = c(result$most_similar_pair[[1]], result$most_similar_pair[[2]])
+
+  # make the plot
+  mu = c(model$sorted_m_mu[, result$most_similar_pair[1] + 1], model$sorted_m_mu[, result$most_similar_pair[2] + 1])
+  profile = c(rep(paste0('profile ', result$most_similar_pair[1] + start_profile_labels_from1), model$m),
+              rep(paste0('profile ', result$most_similar_pair[2] + start_profile_labels_from1), model$m))
+  variable = factor(rep(c(model$x_names), each = 2), levels = model$x_names, ordered = TRUE)
+  plot_df = data.frame(mu = mu, profile = profile, variable = variable)
+
+  plot = ggplot(plot_df, aes(x = variable, y = mu)) +
+    geom_bar(stat = 'identity') +
+    theme_classic(base_size = font_size) +
+    theme(figure_size = figure_size, axis.text.x = element_text(angle = 90, hjust = 1)) +
+    facet_wrap(~profile, scales = 'free_x', ncol = 2)
+
+  # fix "most_similar_pair'
+  result$most_similar_pair = result$most_similar_pair + start_profile_labels_from1
+
+  # return the results
+  return(result)
 }
 
-plot_profile_probs = function(model,
+plot_profile_probs_py = function(model,
                               figure_size = c(4, 3),
                               font_size = 11,
                               start_profile_labels_from1 = TRUE){
   return(model$plot_profile_probs(figure_size, font_size, start_profile_labels_from1)$show())
-}
-
-plot_profile_means = function(model,
-                              figure_size = c(4, 3),
-                              font_size = 11,
-                              kind = 'bar',
-                              facet_var = 'profile',
-                              ncol = 4,
-                              fancy_labels = TRUE,
-                              start_profile_labels_from1 = TRUE){
-  return(model$plot_profile_means(figure_size, font_size, kind, facet_var, ncol, fancy_labels, start_profile_labels_from1)$show())
-}
-
-plot_lpa_residuals = function(model,
-                              figure_size = c(4, 3),
-                              font_size = 11,
-                              ncol = 4,
-                              bins = 20){
-  return(model$plot_residuals(figure_size, font_size, ncol, bins)$show())
 }
 
 lpa_residual_correlations = function(model,
@@ -66,14 +67,12 @@ print_lpa_summary = function(model,
 
 outcome_analysis_normal = function(model,
                                    y,
-                                   profile_labels = NULL,
                                    do_post_hoc = TRUE,
                                    start_profile_labels_from1 = TRUE,
                                    prior_alpha = 1.0,
                                    prior_beta = 1.0,
                                    prior_m = 0.0,
                                    prior_lambda = 1.0,
-                                   figure_size = c(5, 6),
                                    font_size = 11,
                                    facet_var = 'variable',
                                    ncol = 4,
@@ -81,19 +80,33 @@ outcome_analysis_normal = function(model,
   if(standardize_data){
     y = as.data.frame(scale(y))
   }
-  result = lpa$lpa_outcome_analysis$fit_y_normal(model, y, profile_labels, do_post_hoc, start_profile_labels_from1, prior_alpha, prior_beta, prior_m, prior_lambda, figure_size, font_size, facet_var, ncol)
+  result = lpa$lpa_outcome_analysis$fit_y_normal(model, y, NULL, do_post_hoc, start_profile_labels_from1, prior_alpha, prior_beta, prior_m, prior_lambda, NULL, font_size, facet_var, ncol)
+
+  # fix up the Bayes factors data frame
   rownames(result$bayes_factors) = colnames(y) # for some reason, the variable names are dropped, so I need to add them back in
   result$bayes_factors$bf10 = round(as.numeric(result$bayes_factors$bf10), 2) # need to fix column types to get things to display properly
   result$bayes_factors$log10_bf10 = round(as.numeric(result$bayes_factors$log10_bf10), 2)
   result$bayes_factors$post_hoc_result = as.character(result$bayes_factors$post_hoc_result)
   print(result$bayes_factors)
+
+  # make the plot of outcome profile means
+  xvar = ifelse(facet_var == 'variable', 'profile', 'variable')
+  plot = ggplot(result$plot_df, aes(x = .data[[xvar]], y = mu, ymin = mu_minus, ymax = mu_plus)) +
+    geom_point() +
+    geom_errorbar() +
+    theme_classic(base_size = font_size)
+  if(ncol(y) > 1){
+    plot = plot + facet_wrap(vars(.data[[facet_var]]), scales = "free", ncol = ncol)
+  }
+  result$plot = plot
+  plot  # display the plot
+
   return(result)
 }
 
 extract_profiles = function(model,
                             start_profile_labels_from1 = TRUE,
-                            profile_probs = FALSE,
-                            include_x = FALSE){
+                            profile_probs = FALSE){
   if(profile_probs){
     profile_df = as.data.frame(t(model$sorted_phi))
     colnames(profile_df) = paste0('P(profile ',
@@ -104,13 +117,6 @@ extract_profiles = function(model,
   else{
     profile_df = data.frame(profile = model$z_hat + start_profile_labels_from1,
                             row.names = model$index)
-  }
-
-  if(include_x){
-    x_df = t(model$x)
-    colnames(x_df) = model$x_names_R
-    rownames(x_df) = model$index
-    profile_df = cbind(x_df, profile_df)
   }
 
   return(profile_df)

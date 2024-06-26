@@ -8,13 +8,12 @@ Analyze the relationship between dependent variables (y) - that are assumed to
 be normally distributed - and the profiles. This is done without changing the model's other variational parameters.
 }
 \usage{
-outcome_analysis_normal(model, y, profile_labels = NULL, start_profile_labels_from1 = FALSE, prior_alpha = 1, prior_beta = 1, prior_m = 0, prior_lambda = 1, figure_size = c("10", "12"), font_size = 11, facet_var = "variable", ncol = 4)
+outcome_analysis_normal(model, y, start_profile_labels_from1 = FALSE, prior_alpha = 1, prior_beta = 1, prior_m = 0, prior_lambda = 1, font_size = 11, facet_var = "variable", ncol = 4)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{model}{The fitted LPA model.}
   \item{y}{Outcome data (data frame).}
-  \item{profile_labels}{Optional labels for latent profiles.}
   \item{do_post_hoc}{Whether or not to do post-hoc analysis to group profile means into
         partitions. This can be computationally intensive if there are more
         than a few profiles.}
@@ -23,7 +22,6 @@ outcome_analysis_normal(model, y, profile_labels = NULL, start_profile_labels_fr
   \item{prior_beta}{Prior beta parameter.}
   \item{prior_m}{Prior m parameter.}
   \item{prior_lambda}{Prior lambda parameter.}
-  \item{figure_size}{Size of plots.}
   \item{font_size}{Font size for plots.}
   \item{facet_var}{Faceting variable for plots.}
   \item{ncol}{Number of columns to use in plots.}

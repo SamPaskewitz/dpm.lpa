@@ -14,4 +14,6 @@ lpa <- NULL
   }
   reticulate::use_condaenv('r-dpm_lpa') # Activate the r-dpm_lpa conda environment.
   lpa <<- reticulate::import('vbayesfa') # Import the vbayesfa Python package.
+
+  library(ggplot2)
 }

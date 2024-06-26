@@ -8,11 +8,11 @@ Computes pairwise distance and similarity between latent profiles.
 Computes pairwise distance and similarity between latent profiles.
 }
 \usage{
-profile_similarity(x)
+profile_similarity(model, font_size = 11, start_profile_labels_from1 = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{figure_size}{Size of plots.}
+  \item{model}{DPM-LPA model object.}
   \item{font_size}{Font size for plots.}
   \item{start_profile_labels_from1}{Whether to label latent profiles starting from 0 (Python style or from 1 (R/Matlab/ordinary counting style). This only affects output labeling, not any calculations.}
 }

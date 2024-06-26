@@ -4,14 +4,11 @@
 \title{Plot residuals (actual observations - posterior mean predicted observations).}
 \description{Plot residuals (actual observations - posterior mean predicted observations).}
 \usage{
-plot_lpa_residuals(model, figure_size = c(6, 5), font_size = 11, ncol = 4, bins = 20)
+plot_lpa_residuals(model, font_size = 11, ncol = 4, bins = 20)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{model}{
-%%     ~~Describe \code{model} here~~
-}
-  \item{figure_size}{Size of plots.}
+  \item{model}{DPM-LPA model object.}
   \item{font_size}{Font size for plots.}
   \item{ncol}{Number of columns to use in plots.}
   \item{bins}{Number of bins for histograms.}

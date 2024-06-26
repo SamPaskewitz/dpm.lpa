@@ -1,0 +1,76 @@
+---
+title: "outcome_analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{outcome_analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction.
+This vignette illustrates an analysis examining whether latent profiles (based on cognitive tasks data)
+are related to school grades in different subjects (math, reading, gym). This is a follow-up to the
+'fitting_LPA_model' vignette.
+
+## Set up
+
+### Load the dpm.lpa R package
+```{r setup}
+library(dpm.lpa)
+```
+### Load data
+```{r import_data}
+data(lpa_example_data)
+```
+
+### Fit the DPM-LPA model
+This simply repeats the final DPM-LPA model fit described in the 'fitting_LPA_model' vignette.
+```{r fit_model_v2, cache = TRUE}
+x_v2 = lpa_example_data[, c('wcst', 'stroop', 'trail_making', 'nback_digit')] # drop nback_picture
+x_v2$trail_making = log(x_v2$trail_making) # log-transform trail_making
+x_v2 = as.data.frame(scale(x_v2)) # scale, i.e. z-score
+fitted_lpa_v2 = fit_dpm_lpa(x = x_v2)
+```
+
+## Run the analysis function
+We now want to see if the latent profiles are related to some outcome variables.
+We first use the 'outcome_analysis_normal' function to run the analysis. This
+returns a list with various results. We save this list as 'result'. You can view the
+function's documentation (using '?outcome_analysis_normal') for a description of
+each of the elements contained in the function's output. We are mainly interested
+in two outputs: the results of analysis using Bayes factors, and a plot of estimated
+profile outcome means.
+```{r run_outcome_analysis}
+result = outcome_analysis_normal(model = fitted_lpa_v2,
+                                 y = lpa_example_data[, c('math', 'reading', 'gym')])
+```
+
+## Bayes factors
+This table reports the results of Bayesian analysis of variance.
+The first column ("bf10") reports the Bayes factor, which is the ratio of evidence for H1 (the latent profiles have different means) divided by the evidence for H0 (the latent profiles have the same mean).
+The second column ("log10_bf10") reports the base-10 logarithm of the Bayes factor, which can be easier to interpret.
+The third column ("conclusion") reports the conclusion of the Bayes factor, which is that the profile means differ, are equal, or the evidence is not decisive. This is based on the conventional criterion of log10(BF) > 0.5 being decisive.
+Finally, the fourth column ("post_hoc_result") reports the result of post-hoc analysis, which partitions the latent profiles into groups that have the same mean as each other. See the function documentation for further details.
+
+In this example, the Bayes factors indicate that the profiles have different means for math and reading (with stronger evidence in the case of math), but have the same mean for gym (the null hypothesis is supported, something we can do in Bayesian analysis). Post-hoc tests indicate that all three profile have different means for math, but that profiles 1 and 2 have the same mean for reading (with profile 3 having a different mean).
+```{r bayes_factors}
+result$bayes_factors
+```
+
+## Plot of profile outcome variable means (95% credible interval)
+```{r outcome_plot}
+result$plot
+```
+
+## Data frame of profile outcome means (same data that is plotted above)
+This is a data frame containing the same data that is plotted above. It gives the posterior mean (mu), variance (v), and the lower and upper bounds of the 95% credible interval (mu_minus, mu_plus) of each profile's mean for each outcome variable. This data frame can be exported if desired (using the write.csv function for example).
+```{r}
+result$plot_df
+```
