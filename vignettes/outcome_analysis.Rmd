@@ -15,9 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ## Introduction.
-This vignette illustrates an analysis examining whether latent profiles (based on cognitive tasks data)
-are related to school grades in different subjects (math, reading, gym). This is a follow-up to the
-'fitting_LPA_model' vignette.
+This vignette illustrates an analysis examining whether latent profiles (based on cognitive tasks data) are related to school grades in different subjects (math, reading, gym). This is a follow-up to the 'fitting_LPA_model' vignette.
 
 ## Set up
 
@@ -25,6 +23,7 @@ are related to school grades in different subjects (math, reading, gym). This is
 ```{r setup}
 library(dpm.lpa)
 ```
+
 ### Load data
 ```{r import_data}
 data(lpa_example_data)

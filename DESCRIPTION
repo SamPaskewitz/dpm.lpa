@@ -21,7 +21,8 @@ Config/reticulate/autoconfigure:
 License: What license is it under?
 Depends: 
     R (>= 2.10),
-    reticulate
+    reticulate,
+    ggplot2
 Encoding: UTF-8
 LazyData: true
 Suggests: 

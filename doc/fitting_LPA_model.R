@@ -7,9 +7,6 @@ knitr::opts_chunk$set(
 library(dpm.lpa)
 # To build: devtools::build_vignettes()
 
-## ----update_python_packages---------------------------------------------------
-#update_python_packages()
-
 ## ----import_data--------------------------------------------------------------
 data(lpa_example_data)
 

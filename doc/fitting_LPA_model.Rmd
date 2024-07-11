@@ -22,10 +22,7 @@ This vignette illustrates Dirichlet Process Mixture Latent Profile Analysis (DPM
 library(dpm.lpa)
 # To build: devtools::build_vignettes()
 ```
-### Update relevant Python packages to the latest versions (this is optional and thus commented out)
-```{r update_python_packages}
-#update_python_packages()
-```
+
 ### Load data
 ```{r import_data}
 data(lpa_example_data)

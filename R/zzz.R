@@ -1,4 +1,4 @@
-lpa <- NULL
+#lpa <- NULL
 
 .onLoad <- function(libname, pkgname) { # This is run every time the R package is loaded.
   try(reticulate::install_miniconda(), silent = TRUE) # Install Miniconda if it isn't already installed.
@@ -11,8 +11,19 @@ lpa <- NULL
     reticulate::conda_install(envname = 'r-dpm_lpa',
                               packages = c('vbayesfa', 'plotnine'),
                               pip = TRUE)
+    reticulate::use_condaenv('r-dpm_lpa') # Activate the r-dpm_lpa conda environment.
   }
-  reticulate::use_condaenv('r-dpm_lpa') # Activate the r-dpm_lpa conda environment.
+  else{
+    # If the conda environment already exists, update the Python
+    # packages to the latest version.
+    print('Updating Python packages (if necessary).')
+    reticulate::use_condaenv('r-dpm_lpa') # Activate the r-dpm_lpa conda environment.
+    reticulate::conda_install(envname = 'r-dpm_lpa',
+                              packages = c('numpy', 'scipy', 'pandas', 'vbayesfa', 'plotnine'),
+                              pip = TRUE,
+                              pip_options = '--upgrade')
+  }
+  #reticulate::use_condaenv('r-dpm_lpa') # Activate the r-dpm_lpa conda environment.
   lpa <<- reticulate::import('vbayesfa') # Import the vbayesfa Python package.
 
   library(ggplot2)
