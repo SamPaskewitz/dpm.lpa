@@ -1,7 +1,7 @@
 Package: dpm.lpa
 Type: Package
 Title: Dirichlet Process Mixture Latent Profile Analysis
-Version: 0.1.0
+Version: 0.1.1
 Author: Sam Paskewitz
 Maintainer: Sam Paskewitz <samuel.paskewitz@yale.edu>
 Description: Performs a type of Bayesian latent profile analysis (LPA) that 

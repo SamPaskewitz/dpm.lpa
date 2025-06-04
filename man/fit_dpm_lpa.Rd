@@ -7,7 +7,22 @@
   field variational Bayes.
 }
 \usage{
-fit_dpm_lpa(x, starting_hpar = NULL, n_workers = 4, restarts = 4, truncation_level = 20, prior_w1 = 3, prior_w2 = 1, prior_lambda_mu = 0.5, prior_strength_for_xi = 10, seed = 1234, tolerance = 1e-05, max_iter = 50, min_iter = 30)
+fit_dpm_lpa(
+                       x,
+                       n_workers = 4,
+                       kmeans = TRUE,
+                       restarts = 10,
+                       truncation_level = 20,
+                       prior_w1 = 3.0,
+                       prior_w2 = 1.0,
+                       prior_lambda_mu = 0.5,
+                       prior_strength_for_xi = 10.0,
+                       seed = 1234,
+                       tolerance = 1e-05,
+                       max_iter = 50,
+                       min_iter = 30,
+                       standardize_data = TRUE
+)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +32,9 @@ fit_dpm_lpa(x, starting_hpar = NULL, n_workers = 4, restarts = 4, truncation_lev
   \item{n_workers}{
   Number of workers in the pool for parallel processing; should be less than or
   equal to the number of available CPUs.
+}
+  \item{kmeans}{
+  Whether or not to use the k-means algorithm for starting locations (in addition to random restarts).
 }
   \item{restarts}{
   Number of random restarts.
@@ -63,8 +81,7 @@ fit_dpm_lpa(x, starting_hpar = NULL, n_workers = 4, restarts = 4, truncation_lev
 \author{Sam Paskewitz}
 \note{
   This is a wrapper for the fit_lpa function in the fit_lpa.py Python module.
-  Unlike that function, this just returns the best fitting model, and not the
-  models with the other random restarts.
+  Unlike that function, this just returns the best fitting model.
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
